@@ -7,6 +7,7 @@ import Sidebar from "~/components/Sidebar";
 import { api } from "~/utils/api";
 
 export default function RemindersPage() {
+  const utils = api.useContext();
   const reminders = api.reminders.getAll.useQuery();
   const reminderMutation = api.reminders.createReminder.useMutation();
 
@@ -16,10 +17,10 @@ export default function RemindersPage() {
     body: "",
   });
 
-  const handleCreateReminder: FormEventHandler<HTMLFormElement> = (e) => {
+  const handleCreateReminder: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-
     reminderMutation.mutate(creatingReminderInfo);
+    utils.reminders.invalidate();
   };
 
   return (

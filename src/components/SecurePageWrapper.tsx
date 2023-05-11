@@ -12,7 +12,7 @@ export default function SecurePageWrapper({
 
   switch (session.status) {
     case "authenticated":
-      return <div>{children}</div>;
+      return <>{children}</>;
     case "unauthenticated":
       router.push("/");
       break;
