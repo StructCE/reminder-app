@@ -18,5 +18,16 @@ const config = {
     locales: ["pt-BR"],
     defaultLocale: "pt-BR",
   },
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "authjs.dev",
+        pathname: "/img/**",
+        port: "",
+      },
+    ],
+  },
 };
 export default config;

@@ -30,11 +30,11 @@ export default function RemindersPage() {
         <meta name="description" content="Seus lembretes na Struct" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <section className="flex min-h-screen bg-gradient-to-b from-[#a1cef8] to-[#15162c]">
+      <section className="flex h-screen bg-gradient-to-b from-[#5ba7ee] to-[#15162c]">
         <Sidebar />
-        <main className="w-full">
+        <main className="w-full overflow-scroll bg-stone-500 bg-opacity-10 py-6 backdrop-blur-2xl">
           <div className="mx-auto w-full xl:w-3/6">
-            <ul className="flex min-h-[90vh] flex-col gap-2 rounded-xl bg-stone-500 bg-opacity-10 p-10 backdrop-blur-2xl">
+            <ul className="flex min-h-[90vh] flex-col rounded-xl">
               {reminders.data
                 ? reminders.data.map((reminder) => (
                     <li key={reminder.id}>

@@ -34,11 +34,11 @@ export const Reminder = ({
   return (
     <div
       key={reminder.id}
-      className="flex flex-wrap border border-solid border-slate-500 p-3"
+      className="flex flex-wrap border-y border-solid border-orange-400 p-3"
     >
       <textarea
         onChange={(e) => handleReminderChange(e, reminder)}
-        className="h-40 max-w-full flex-1"
+        className="h-40 max-w-full flex-1 drop-shadow-2xl"
         name="body"
         value={reminder.body}
       />
