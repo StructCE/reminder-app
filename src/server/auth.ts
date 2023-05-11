@@ -32,20 +32,20 @@ declare module "next-auth" {
   // }
 }
 
-/**
- * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
- *
- * @see https://next-auth.js.org/configuration/options
- */
-
 function isGoogleSignIn(
   account: Account | null,
   profile?: Profile
 ): profile is (Profile & { email_verified: boolean }) | undefined {
   return account?.provider === "google";
 }
+/**
+ * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
+ *
+ * @see https://next-auth.js.org/configuration/options
+ */
 
 export const authOptions: NextAuthOptions = {
+  secret: env.NEXTAUTH_SECRET,
   callbacks: {
     session: ({ session, user }) => ({
       ...session,
@@ -57,7 +57,7 @@ export const authOptions: NextAuthOptions = {
     signIn: async ({ account, profile }) => {
       if (isGoogleSignIn(account, profile)) {
         return !!(
-          profile?.email_verified && profile.email?.endsWith("@example.com")
+          profile?.email_verified && profile.email?.endsWith("@struct.unb.br")
         );
       }
       return true; // Do different verification for other providers that don't have `email_verified`
