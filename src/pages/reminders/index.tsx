@@ -2,6 +2,7 @@ import { type Reminder as ReminderT } from "@prisma/client";
 import Head from "next/head";
 import { FormEventHandler, useState } from "react";
 import { Reminder } from "~/components/Reminder";
+import SecurePageWrapper from "~/components/SecurePageWrapper";
 import Sidebar from "~/components/Sidebar";
 import { api } from "~/utils/api";
 
@@ -22,7 +23,7 @@ export default function RemindersPage() {
   };
 
   return (
-    <>
+    <SecurePageWrapper>
       <Head>
         <title>Lembretes</title>
         <meta name="description" content="Seus lembretes na Struct" />
@@ -66,6 +67,6 @@ export default function RemindersPage() {
           </div>
         </main>
       </section>
-    </>
+    </SecurePageWrapper>
   );
 }
