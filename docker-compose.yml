@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  app:
+    platform: "linux/amd64"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_CLIENTVAR: "clientvar"
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    image: next_app_img:latest
+    environment:
+      - DATABASE_URL=mysql://foo:password@db:3306/bar
+    volumes:
+      - .env:/app/.env
+  db:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_USER: foo
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: bar
+      MYSQL_RANDOM_ROOT_PASSWORD: true
+    volumes:
+      - db:/var/lib/mysql
+
+volumes:
+  db: {}
