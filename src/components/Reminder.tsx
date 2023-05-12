@@ -1,58 +1,69 @@
 // import { BookmarkMinus, BookmarkPlus, Trash2 } from "lucide-react";
 import { useState, useRef, ChangeEvent } from "react";
 import { type Reminder as ReminderT } from "@prisma/client";
+import { CheckCheck, Trash2 } from "lucide-react";
+
+type ReminderProps = {
+  reminder: ReminderT;
+  handleDeleteReminder: (id: string) => void;
+  handleUpdateReminder: (reminder: ReminderT) => void;
+};
 
 export const Reminder = ({
   reminder: originalReminder,
-}: {
-  reminder: ReminderT;
-}) => {
-  const [reminder, setReminder] = useState(originalReminder);
+  handleDeleteReminder,
+  handleUpdateReminder,
+}: ReminderProps) => {
+  const [reminderBody, setReminderBody] = useState(originalReminder.body);
   const timeoutRef = useRef<undefined | NodeJS.Timeout>();
 
-  function handleReminderChange(
+  function handleBodyChange(
     e: ChangeEvent<HTMLTextAreaElement>,
     reminder: ReminderT
   ) {
-    const propName = e.target.name;
     const value = e.target.value;
-
-    if (propName === "id") {
-      // Não faça cagada, caro programador
-      throw new Error("Não é possível alterar o id");
-    }
 
     clearTimeout(timeoutRef.current);
 
-    setReminder({ ...reminder, [propName]: value });
+    setReminderBody(value);
 
     timeoutRef.current = setTimeout(() => {
-      //   updateReminder({ ...reminder, [propName]: value });
+      handleUpdateReminder({ ...reminder, body: value });
     }, 1000);
   }
 
   return (
-    <div
-      key={reminder.id}
-      className="flex flex-wrap border-y border-solid border-orange-400 p-3"
-    >
+    <div key={originalReminder.id} className="flex flex-wrap p-3">
       <textarea
-        onChange={(e) => handleReminderChange(e, reminder)}
-        className="h-40 max-w-full flex-1 drop-shadow-2xl"
+        onChange={(e) => handleBodyChange(e, originalReminder)}
+        className="h-40 max-w-full flex-1 rounded-md bg-blue-950 bg-opacity-50 p-3 text-white drop-shadow-2xl"
         name="body"
-        value={reminder.body}
+        value={reminderBody}
       />
-
-      {/* <div className="p-3 flex flex-wrap flex-col">
-        <button
-          className="text-red-500 rounded-md p-2"
-          onClick={() => {
-            deleteReminder(reminder.id);
-          }}
-        >
-          <Trash2 />
-        </button>
-        <button
+      <div className="flex flex-col flex-wrap p-3">
+        {originalReminder.completed ? (
+          <button
+            name="Deletar"
+            className="rounded-md bg-blue-950 bg-opacity-60 p-2 text-red-500 transition-transform hover:scale-105"
+            onClick={() => {
+              handleDeleteReminder(originalReminder.id);
+            }}
+          >
+            <Trash2 />
+          </button>
+        ) : (
+          <button
+            name="Completado"
+            className="rounded-md bg-blue-950 bg-opacity-60 p-2 text-green-500 transition-transform hover:scale-105"
+            onClick={() => {
+              handleUpdateReminder({ ...originalReminder, completed: true });
+            }}
+          >
+            <CheckCheck />
+          </button>
+        )}
+      </div>
+      {/* <button
           name="priority"
           value="Important"
           className="text-yellow-400 rounded-md p-2"
