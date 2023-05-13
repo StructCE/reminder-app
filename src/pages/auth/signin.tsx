@@ -1,26 +1,17 @@
+import { signIn } from "next-auth/react";
 import Image from "next/image";
+import { env } from "~/env.mjs";
 
 export default function SignInPage() {
   return (
     <main className="flex min-h-screen w-full flex-col items-center justify-center bg-zinc-900">
       <div className="flex flex-col items-center gap-4 rounded-xl bg-zinc-800 p-16">
         <h1 className="text-3xl text-white">Entre com sua conta da Struct:</h1>
-        <form
-          action="http://localhost:3000/api/auth/signin/google"
-          method="POST"
-        >
-          <input
-            type="hidden"
-            name="csrfToken"
-            value="cc2abc632faaecd6ef12c33c4de37213a9d99c9a16399fdee0973d14044efb61"
-          />
-          <input
-            type="hidden"
-            name="callbackUrl"
-            value="http://localhost:3000/"
-          />
+        <div>
           <button
-            type="submit"
+            onClick={() =>
+              signIn("google", { callbackUrl: env.NEXT_PUBLIC_BASE_URL })
+            }
             className="flex rounded-md border-b-2 border-r-2 border-zinc-500 bg-slate-100 p-4 transition-transform hover:scale-y-[102%]"
           >
             <Image
@@ -32,7 +23,7 @@ export default function SignInPage() {
             />
             <span className="mx-10 text-xl">Entre com Google</span>
           </button>
-        </form>
+        </div>
       </div>
     </main>
   );
