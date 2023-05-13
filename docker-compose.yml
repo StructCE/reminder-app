@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.3"
 services:
   app:
     platform: "linux/amd64"
@@ -12,9 +12,11 @@ services:
       - "3000:3000"
     image: next_app_img:latest
     environment:
-      - DATABASE_URL=mysql://foo:password@db:3306/bar
-    volumes:
-      - .env:/app/.env
+      NEXTAUTH_SECRET: ""
+      NEXTAUTH_URL: ""
+      GOOGLE_CLIENT_ID: ""
+      GOOGLE_CLIENT_SECRET: ""
+      DATABASE_URL: "mysql://foo:password@db:3306/bar"
   db:
     image: mysql:8
     command: --default-authentication-plugin=mysql_native_password
