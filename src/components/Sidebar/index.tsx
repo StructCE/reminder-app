@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import { signOut } from "next-auth/react";
 import { MenuSquare, CopyX, LogOut } from "lucide-react";
 
-const openButtonHeight = 4;
-
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
 
@@ -12,19 +10,29 @@ export default function Sidebar() {
     <>
       <button
         onClick={() => setOpen((op) => !op)}
-        className={`fixed left-0 top-0 z-50 h-${openButtonHeight} w-${openButtonHeight} md:invisible`}
+        className={"fixed left-0 top-0 z-50 h-10 w-10 md:invisible md:hidden"}
       >
         <CopyX
-          className={`absolute transition-all opacity-${open ? "100" : "0"}`}
+          className={
+            open
+              ? "absolute left-2 top-2 opacity-100 transition-all"
+              : "absolute left-2 top-2 opacity-0 transition-all"
+          }
         />
         <MenuSquare
-          className={`opacity-${open ? "0" : "100"} transition-all`}
+          className={
+            open
+              ? "absolute left-2 top-2 opacity-0 transition-all"
+              : "absolute left-2 top-2 opacity-100 transition-all"
+          }
         />
       </button>
       <aside
-        className={`fixed left-0 top-0 z-40 flex h-screen flex-col items-start justify-between pt-8 md:relative md:h-[unset] md:translate-x-0 md:pt-4 ${
-          open ? "translate-x-0" : "-translate-x-full"
-        } min-w-max gap-4 bg-slate-700 bg-opacity-80 backdrop-blur-2xl transition-all md:mt-0 md:justify-around`}
+        className={
+          open
+            ? "fixed left-0 top-0 z-40 flex h-screen min-w-max translate-x-0     flex-col items-start justify-between gap-4 bg-slate-700 bg-opacity-80 pt-8 backdrop-blur-2xl transition-all md:relative md:mt-0 md:h-[unset] md:translate-x-0 md:justify-around md:pt-4"
+            : "fixed left-0 top-0 z-40 flex h-screen min-w-max -translate-x-full flex-col items-start justify-between gap-4 bg-slate-700 bg-opacity-80 pt-8 backdrop-blur-2xl transition-all md:relative md:mt-0 md:h-[unset] md:translate-x-0 md:justify-around md:pt-4"
+        }
       >
         <div className="mb-auto w-full">
           <h2 className="m-1 text-sm text-zinc-100">Rotas</h2>
