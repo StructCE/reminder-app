@@ -64,9 +64,9 @@ export default function RemindersPage() {
       </Head>
       <section className="flex h-screen bg-gradient-to-b from-[#5ba7ee] to-[#15162c]">
         <Sidebar />
-        <main className="w-full overflow-scroll bg-stone-500 bg-opacity-10 py-6 backdrop-blur-2xl">
+        <main className="w-full overflow-scroll bg-stone-500 bg-opacity-10 px-2 py-2 backdrop-blur-2xl">
           <div className="mx-auto w-full xl:w-3/6">
-            <h1 className="text-7xl">Lembretes</h1>
+            <h1 className="my-10 text-4xl md:text-7xl">Lembretes</h1>
             <RadioGroup.Root
               className="flex justify-around"
               value={showCompleted ? "completed" : "pending"}
@@ -97,7 +97,7 @@ export default function RemindersPage() {
               </RadioGroup.Item>
             </RadioGroup.Root>
 
-            <ul className="flex min-h-[80vh] flex-col rounded-xl">
+            <ul className="flex min-h-[70vh] flex-col rounded-xl">
               {shownReminders
                 ? shownReminders.map((reminder) => (
                     <li key={reminder.id}>
