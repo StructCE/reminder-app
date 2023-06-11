@@ -62,11 +62,11 @@ export default function RemindersPage() {
         <meta name="description" content="Seus lembretes na Struct" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <section className="flex h-screen bg-gradient-to-b from-[#5ba7ee] to-[#15162c]">
+      <section className="flex h-screen bg-gradient-to-b from-[rgb(51,65,85)] to-[#0d1115]">
         <Sidebar />
         <main className="w-full overflow-scroll bg-stone-500 bg-opacity-10 px-2 py-2 backdrop-blur-2xl">
           <div className="mx-auto w-full xl:w-3/6">
-            <h1 className="my-10 text-4xl md:text-7xl">Lembretes</h1>
+            <h1 className="my-10 text-4xl text-white md:text-7xl">Lembretes</h1>
             <RadioGroup.Root
               className="flex justify-around"
               value={showCompleted ? "completed" : "pending"}
@@ -78,9 +78,9 @@ export default function RemindersPage() {
                 value="pending"
                 id="r1"
               >
-                <Paperclip />
-                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-950 bg-opacity-30" />
-                <label className="cursor-pointer" htmlFor="r1">
+                <Paperclip className="text-zinc-400" />
+                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-950 bg-opacity-80" />
+                <label className="cursor-pointer text-white" htmlFor="r1">
                   Pendentes
                 </label>
               </RadioGroup.Item>
@@ -89,9 +89,9 @@ export default function RemindersPage() {
                 value="completed"
                 id="r2"
               >
-                <Paperclip />
-                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-950 bg-opacity-30" />
-                <label className="cursor-pointer" htmlFor="r2">
+                <Paperclip className="text-zinc-400" />
+                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-950 bg-opacity-80" />
+                <label className="cursor-pointer text-white" htmlFor="r2">
                   Concluídos
                 </label>
               </RadioGroup.Item>
