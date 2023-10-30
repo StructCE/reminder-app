@@ -36,7 +36,7 @@ export const Reminder = ({
     <div key={originalReminder.id} className="flex flex-wrap p-3">
       <textarea
         onChange={(e) => handleBodyChange(e, originalReminder)}
-        className="h-40 max-w-full flex-1 rounded-md bg-blue-950 bg-opacity-50 p-3 text-white drop-shadow-2xl"
+        className="h-40 max-w-full flex-1 rounded-md bg-blue-400/30 bg-opacity-50 p-3 text-white outline-offset-1 outline-orange-400 drop-shadow-2xl focus-visible:outline"
         name="body"
         value={reminderBody}
       />
@@ -44,7 +44,7 @@ export const Reminder = ({
         {originalReminder.completed ? (
           <button
             name="Deletar"
-            className="rounded-md bg-blue-950 bg-opacity-60 p-2 text-red-500 transition-transform hover:scale-105"
+            className="rounded-md bg-blue-400/30 bg-opacity-60 p-2 text-red-500 outline-offset-1 outline-orange-400 transition-transform hover:scale-105 focus-visible:outline"
             onClick={() => {
               handleDeleteReminder(originalReminder.id);
             }}
@@ -54,7 +54,7 @@ export const Reminder = ({
         ) : (
           <button
             name="Completado"
-            className="rounded-md bg-blue-950 bg-opacity-60 p-2 text-green-500 transition-transform hover:scale-105"
+            className="rounded-md bg-blue-400/30 bg-opacity-60 p-2 text-green-500 outline-offset-1 outline-orange-400 transition-transform hover:scale-105 focus-visible:outline"
             onClick={() => {
               handleUpdateReminder({ ...originalReminder, completed: true });
             }}

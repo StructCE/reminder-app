@@ -1,21 +1,28 @@
 import { type Reminder as ReminderT } from "@prisma/client";
 import * as RadioGroup from "@radix-ui/react-radio-group";
-import { Paperclip } from "lucide-react";
+import { LogOut, Paperclip, Plus, X } from "lucide-react";
+import { signOut } from "next-auth/react";
 import Head from "next/head";
-import { FormEventHandler, useState } from "react";
+import { useRouter } from "next/router";
+import {
+  Dispatch,
+  FormEvent,
+  FormEventHandler,
+  SetStateAction,
+  useState,
+} from "react";
 import { Reminder } from "~/components/Reminder";
 import SecurePageWrapper from "~/components/SecurePageWrapper";
-import Sidebar from "~/components/Sidebar";
 import { api } from "~/utils/api";
 
 export default function RemindersPage() {
   const [showCompleted, setShowCompleted] = useState(false);
 
-  const utils = api.useContext();
+  const utils = api.useUtils();
   const reminders = api.reminders.getAll.useQuery();
-  const shownReminders = reminders.data?.filter(
-    (r) => r.completed === showCompleted
-  );
+  const shownReminders = reminders.data
+    ?.filter((r) => r.completed === showCompleted)
+    .toSorted((a, b) => a.position - b.position);
 
   const reminderCreateMutation = api.reminders.createReminder.useMutation({
     onSuccess() {
@@ -39,10 +46,11 @@ export default function RemindersPage() {
     body: "",
   });
 
-  const handleCreateReminder: FormEventHandler<HTMLFormElement> = async (e) => {
+  const handleCreateReminder: (e: FormEvent) => Promise<ReminderT> = async (
+    e
+  ) => {
     e.preventDefault();
-    reminderCreateMutation.mutateAsync(creatingReminderInfo);
-    utils.reminders.invalidate();
+    return reminderCreateMutation.mutateAsync(creatingReminderInfo);
   };
 
   function handleDeleteReminder(id: string) {
@@ -54,6 +62,7 @@ export default function RemindersPage() {
     reminderUpdateMutation.mutate({ reminder });
     return;
   }
+  const router = useRouter();
 
   return (
     <SecurePageWrapper>
@@ -62,11 +71,15 @@ export default function RemindersPage() {
         <meta name="description" content="Seus lembretes na Struct" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <section className="flex h-screen bg-gradient-to-b from-[rgb(51,65,85)] to-[#0d1115]">
-        <Sidebar />
-        <main className="w-full overflow-scroll bg-stone-500 bg-opacity-10 px-2 py-2 backdrop-blur-2xl">
-          <div className="mx-auto w-full xl:w-3/6">
-            <h1 className="my-10 text-4xl text-white md:text-7xl">Lembretes</h1>
+      <section className="min-h-screen bg-gradient-to-b from-[rgb(9,20,36)] to-[rgb(11,27,52)]">
+        <button
+          onClick={() => router.back()}
+          className="w-max justify-around p-2 text-xl text-white hover:bg-[rgba(0,0,0,0.3)]"
+        >
+          <LogOut className="rotate-180 text-amber-500" />
+        </button>
+        <main className="h-full w-full overflow-scroll px-2 py-2">
+          <div className="mx-auto flex h-full w-full flex-col xl:w-3/6">
             <RadioGroup.Root
               className="flex justify-around"
               value={showCompleted ? "completed" : "pending"}
@@ -74,23 +87,23 @@ export default function RemindersPage() {
               aria-label="View density"
             >
               <RadioGroup.Item
-                className="relative flex gap-1 rounded-md p-2"
+                className="relative z-0 flex gap-1 rounded-md p-2 outline-offset-1 outline-orange-400 focus-visible:outline"
                 value="pending"
                 id="r1"
               >
                 <Paperclip className="text-zinc-400" />
-                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-950 bg-opacity-80" />
+                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-500/20" />
                 <label className="cursor-pointer text-white" htmlFor="r1">
                   Pendentes
                 </label>
               </RadioGroup.Item>
               <RadioGroup.Item
-                className="relative flex gap-1 rounded-md p-2"
+                className="relative z-0 flex gap-1 rounded-md p-2 outline-offset-1 outline-orange-400 focus-visible:outline"
                 value="completed"
                 id="r2"
               >
                 <Paperclip className="text-zinc-400" />
-                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-950 bg-opacity-80" />
+                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-500/20" />
                 <label className="cursor-pointer text-white" htmlFor="r2">
                   Concluídos
                 </label>
@@ -110,31 +123,73 @@ export default function RemindersPage() {
                   ))
                 : "Carregando"}
             </ul>
-
-            <form
-              onSubmit={handleCreateReminder}
-              className="flex flex-wrap items-center justify-around"
-            >
-              <label className="flex items-center" htmlFor="body">
-                Corpo do lembrete:
-              </label>
-              <textarea
-                className="rounded-md border-2 border-solid border-slate-900 bg-white p-2 text-zinc-900 "
-                id="body"
-                onChange={(e) =>
-                  setCreatingReminderInfo({ body: e.target.value })
-                }
-              />
-              <button
-                className="rounded-md border-2 border-solid border-slate-400 bg-slate-400 p-2"
-                type="submit"
-              >
-                Criar
-              </button>
-            </form>
+            <CreateReminder
+              handleCreateReminder={handleCreateReminder}
+              setCreatingReminderInfo={setCreatingReminderInfo}
+            />
           </div>
         </main>
       </section>
     </SecurePageWrapper>
+  );
+}
+
+type CreateReminderProps = {
+  handleCreateReminder: (e: FormEvent) => Promise<ReminderT>;
+  setCreatingReminderInfo: Dispatch<SetStateAction<Pick<ReminderT, "body">>>;
+};
+
+function CreateReminder({
+  handleCreateReminder,
+  setCreatingReminderInfo,
+}: CreateReminderProps) {
+  const [isCreating, setIsCreating] = useState(false);
+
+  if (isCreating)
+    return (
+      <form
+        onSubmit={(e) => {
+          handleCreateReminder(e).then(() => {
+            setIsCreating(false);
+            setCreatingReminderInfo({ body: "" });
+            setTimeout(() => {
+              window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: "smooth",
+              });
+            }, 100);
+          });
+        }}
+        className="my-10 flex flex-wrap items-center justify-around"
+      >
+        <button
+          type="button"
+          onClick={() => setIsCreating(false)}
+          className="mb-auto"
+        >
+          <X className="mb-auto text-red-400" />
+        </button>
+        <textarea
+          className="w-3/4 rounded-md bg-blue-400/10 bg-opacity-50 p-3 text-white outline-offset-1 outline-orange-400/50 drop-shadow-2xl focus-visible:outline"
+          id="body"
+          onChange={(e) => setCreatingReminderInfo({ body: e.target.value })}
+          rows={4}
+        />
+        <button
+          className="rounded-md border-2 border-solid border-slate-400 bg-slate-400 p-2"
+          type="submit"
+        >
+          Criar
+        </button>
+      </form>
+    );
+
+  return (
+    <button
+      className="mx-auto my-10 rounded-full bg-blue-500/20 p-2 text-white"
+      onClick={() => setIsCreating(true)}
+    >
+      <Plus className="mx-auto" />
+    </button>
   );
 }
