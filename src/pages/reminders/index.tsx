@@ -145,51 +145,46 @@ function CreateReminder({
 }: CreateReminderProps) {
   const [isCreating, setIsCreating] = useState(false);
 
-  if (isCreating)
-    return (
-      <form
-        onSubmit={(e) => {
-          handleCreateReminder(e).then(() => {
-            setIsCreating(false);
-            setCreatingReminderInfo({ body: "" });
-            setTimeout(() => {
-              window.scrollTo({
-                top: document.body.scrollHeight,
-                behavior: "smooth",
-              });
-            }, 100);
-          });
-        }}
-        className="my-10 flex flex-wrap items-center justify-around"
-      >
-        <button
-          type="button"
-          onClick={() => setIsCreating(false)}
-          className="mb-auto"
-        >
-          <X className="mb-auto text-red-400" />
-        </button>
-        <textarea
-          className="w-3/4 rounded-md bg-blue-400/10 bg-opacity-50 p-3 text-white outline-offset-1 outline-orange-400/50 drop-shadow-2xl focus-visible:outline"
-          id="body"
-          onChange={(e) => setCreatingReminderInfo({ body: e.target.value })}
-          rows={4}
-        />
-        <button
-          className="rounded-md border-2 border-solid border-slate-400 bg-slate-400 p-2"
-          type="submit"
-        >
-          Criar
-        </button>
-      </form>
-    );
-
   return (
-    <button
-      className="mx-auto my-10 rounded-full bg-blue-500/20 p-2 text-white"
-      onClick={() => setIsCreating(true)}
-    >
-      <Plus className="mx-auto" />
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setIsCreating((s) => !s)}
+        className="group mx-auto mt-10 rounded-full bg-blue-500/20 p-2 text-white data-[creating='false']:mb-48 data-[creating='true']:bg-blue-500/10"
+        data-creating={isCreating}
+      >
+        <Plus className="mx-auto transition-all group-data-[creating='true']:rotate-45 group-data-[creating='true']:text-red-400" />
+      </button>
+      {isCreating && (
+        <form
+          onSubmit={(e) => {
+            handleCreateReminder(e).then(() => {
+              setIsCreating(false);
+              setCreatingReminderInfo({ body: "" });
+              setTimeout(() => {
+                window.scrollTo({
+                  top: document.body.scrollHeight,
+                  behavior: "smooth",
+                });
+              }, 100);
+            });
+          }}
+          className="my-10 flex flex-wrap items-center justify-around"
+        >
+          <textarea
+            className="w-3/4 rounded-md bg-blue-400/10 bg-opacity-50 p-3 text-white outline-offset-1 outline-orange-400/50 drop-shadow-2xl focus-visible:outline"
+            id="body"
+            onChange={(e) => setCreatingReminderInfo({ body: e.target.value })}
+            rows={4}
+          />
+          <button
+            className="rounded-md bg-slate-400 px-3 py-2 focus-visible:outline"
+            type="submit"
+          >
+            Criar
+          </button>
+        </form>
+      )}
+    </>
   );
 }
