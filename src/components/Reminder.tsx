@@ -33,14 +33,14 @@ export const Reminder = ({
   }
 
   return (
-    <div key={originalReminder.id} className="flex flex-wrap p-3">
+    <div key={originalReminder.id} className="flex flex-col p-3 md:flex-row">
       <textarea
         onChange={(e) => handleBodyChange(e, originalReminder)}
-        className="h-40 max-w-full flex-1 rounded-md bg-blue-400/30 bg-opacity-50 p-3 text-white outline-offset-1 outline-orange-400 drop-shadow-2xl focus-visible:outline"
+        className="h-40 max-w-full rounded-md bg-blue-400/30 bg-opacity-50 p-3 text-white outline-offset-1 outline-orange-400 drop-shadow-2xl focus-visible:outline md:flex-1"
         name="body"
         value={reminderBody}
       />
-      <div className="flex flex-col flex-wrap p-3">
+      <div className="ml-auto flex py-3 md:flex-col md:px-3">
         {originalReminder.completed ? (
           <button
             name="Deletar"

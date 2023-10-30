@@ -9,6 +9,8 @@ import {
   FormEvent,
   FormEventHandler,
   SetStateAction,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 import { Reminder } from "~/components/Reminder";
@@ -81,7 +83,7 @@ export default function RemindersPage() {
         <main className="h-full w-full overflow-scroll px-2 py-2">
           <div className="mx-auto flex h-full w-full flex-col xl:w-3/6">
             <RadioGroup.Root
-              className="flex justify-around"
+              className="ml-auto flex gap-4 p-3 md:ml-0"
               value={showCompleted ? "completed" : "pending"}
               onValueChange={(v) => setShowCompleted(v === "completed")}
               aria-label="View density"
@@ -144,12 +146,22 @@ function CreateReminder({
   setCreatingReminderInfo,
 }: CreateReminderProps) {
   const [isCreating, setIsCreating] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (isCreating) {
+      textAreaRef.current?.focus({ preventScroll: true });
+      textAreaRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [isCreating]);
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setIsCreating((s) => !s)}
+        onClick={() => {
+          setIsCreating((s) => !s);
+        }}
         className="group mx-auto mt-10 rounded-full bg-blue-500/20 p-2 text-white data-[creating='false']:mb-48 data-[creating='true']:bg-blue-500/10"
         data-creating={isCreating}
       >
@@ -172,6 +184,7 @@ function CreateReminder({
           className="my-10 flex flex-wrap items-center justify-around"
         >
           <textarea
+            ref={textAreaRef}
             className="w-3/4 rounded-md bg-blue-400/10 bg-opacity-50 p-3 text-white outline-offset-1 outline-orange-400/50 drop-shadow-2xl focus-visible:outline"
             id="body"
             onChange={(e) => setCreatingReminderInfo({ body: e.target.value })}
