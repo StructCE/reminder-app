@@ -1,4 +1,5 @@
 function previousChar(c: string) {
+  if (!c) throw new Error("deu merda em previousChar!");
   return String.fromCharCode(c.charCodeAt(0) - 1);
 }
 
@@ -8,7 +9,7 @@ export function getPreviousSortedBy(lastSortedBy: string): string {
   // using getPreviousSorted as well;
   // periodic balancing;
 
-  const lastChar = lastSortedBy[lastSortedBy.length - 1]!;
+  const lastChar = lastSortedBy[lastSortedBy.length - 1];
 
   if (lastChar === "b") return lastSortedBy + "am";
 

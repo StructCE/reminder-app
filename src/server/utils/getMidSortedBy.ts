@@ -1,7 +1,8 @@
 import { getNextSortedBy } from "./getNextSortedBy";
 import { getPreviousSortedBy } from "./getPreviousSortedBy";
 
-function previousChar(c: string) {
+function previousChar(c: string | undefined) {
+  if (!c) throw new Error("deu ruim em previousChar");
   return String.fromCharCode(c.charCodeAt(0) - 1);
 }
 
@@ -27,7 +28,7 @@ export function getMidSortedBy(previous: string, next: string): string {
     return previous + "m";
   }
   if (next.length > previous.length) {
-    const appendChar = previousChar(next[next.length - 1]!);
+    const appendChar = previousChar(next[next.length - 1]);
 
     // nunca deixe chegar em 'a' no final da string:
     if (appendChar === "a")

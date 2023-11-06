@@ -1,22 +1,14 @@
 import { type Reminder as ReminderT } from "@prisma/client";
 import * as RadioGroup from "@radix-ui/react-radio-group";
-import { LogOut, Paperclip, Plus, X } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { LogOut, Paperclip } from "lucide-react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import {
-  Dispatch,
-  FormEvent,
-  FormEventHandler,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type FormEvent, useState } from "react";
+import { CreateReminder } from "~/components/CreateReminder";
 import { Reminder } from "~/components/Reminder";
 import SecurePageWrapper from "~/components/SecurePageWrapper";
 import { DragNDropContextProvider } from "~/hooks/useDragNDrop";
-import { RouterInputs, RouterOutputs, api } from "~/utils/api";
+import { type RouterInputs, api } from "~/utils/api";
 
 function compareReminderSort(a: string, b: string) {
   return a < b ? -1 : a === b ? 0 : 1;
@@ -27,29 +19,42 @@ export default function RemindersPage() {
 
   const utils = api.useUtils();
   const reminders = api.reminders.getAll.useQuery();
-  const shownReminders = reminders.data
-    ?.filter((r) => r.completed === showCompleted)
-    .toSorted((a, b) => compareReminderSort(a.sortedBy, b.sortedBy))!;
+  const shownReminders =
+    reminders.data
+      ?.filter((r) => r.completed === showCompleted)
+      .toSorted((a, b) => compareReminderSort(a.sortedBy, b.sortedBy)) ?? [];
 
   const reminderCreateMutation = api.reminders.createReminder.useMutation({
     onSuccess() {
-      utils.reminders.getAll.refetch();
+      void utils.reminders.getAll.refetch();
+    },
+    onError() {
+      alert("Ocorreu um erro ao tentar criar o lembrete...");
     },
   });
   const reminderDeleteMutation = api.reminders.deleteReminder.useMutation({
     onSuccess() {
-      utils.reminders.getAll.refetch();
+      void utils.reminders.getAll.refetch();
+    },
+    onError() {
+      alert("Ocorreu um erro ao tentar deletar o lembrete...");
     },
   });
   const reminderUpdateMutation = api.reminders.updateReminder.useMutation({
     onSuccess() {
-      utils.reminders.getAll.refetch();
+      void utils.reminders.getAll.refetch();
+    },
+    onError() {
+      alert("Ocorreu um erro ao tentar fazer update do lembrete...");
     },
   });
 
   const reorderMutation = api.reminders.updateSortedBy.useMutation({
     onSuccess() {
-      utils.reminders.getAll.refetch();
+      void utils.reminders.getAll.refetch();
+    },
+    onError() {
+      alert("Ocorreu um erro ao tentar reordenar os lembretes...");
     },
   });
 
@@ -168,78 +173,5 @@ export default function RemindersPage() {
         </main>
       </section>
     </SecurePageWrapper>
-  );
-}
-
-type CreateReminderProps = {
-  handleCreateReminder: (
-    e: FormEvent
-  ) => Promise<RouterOutputs["reminders"]["createReminder"]>;
-  setCreatingReminderInfo: Dispatch<
-    SetStateAction<
-      Omit<RouterInputs["reminders"]["createReminder"], "lastSortedBy">
-    >
-  >;
-};
-
-function CreateReminder({
-  handleCreateReminder,
-  setCreatingReminderInfo,
-}: CreateReminderProps) {
-  const [isCreating, setIsCreating] = useState(false);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (isCreating) {
-      textAreaRef.current?.focus({ preventScroll: true });
-      textAreaRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [isCreating]);
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => {
-          setIsCreating((s) => !s);
-        }}
-        className="group mx-auto mt-10 rounded-full bg-blue-500/20 p-2 text-white data-[creating='false']:mb-48 data-[creating='true']:bg-blue-500/10"
-        data-creating={isCreating}
-      >
-        <Plus className="mx-auto transition-all group-data-[creating='true']:rotate-45 group-data-[creating='true']:text-red-400" />
-      </button>
-      {isCreating && (
-        <form
-          onSubmit={(e) => {
-            handleCreateReminder(e).then(() => {
-              setCreatingReminderInfo((pr) => ({ ...pr, body: "" }));
-              setTimeout(() => {
-                window.scrollTo({
-                  top: document.body.scrollHeight,
-                  behavior: "smooth",
-                });
-              }, 100);
-            });
-          }}
-          className="my-10 flex flex-wrap items-center justify-around"
-        >
-          <textarea
-            ref={textAreaRef}
-            className="w-3/4 rounded-md bg-blue-400/10 bg-opacity-50 p-3 text-white outline-offset-1 outline-orange-400/50 drop-shadow-2xl focus-visible:outline"
-            id="body"
-            onChange={(e) =>
-              setCreatingReminderInfo((pr) => ({ ...pr, body: e.target.value }))
-            }
-            rows={4}
-          />
-          <button
-            className="rounded-md bg-slate-400 px-3 py-2 focus-visible:outline"
-            type="submit"
-          >
-            Criar
-          </button>
-        </form>
-      )}
-    </>
   );
 }

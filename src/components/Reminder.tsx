@@ -1,8 +1,7 @@
 // import { BookmarkMinus, BookmarkPlus, Trash2 } from "lucide-react";
-import { useState, useRef, ChangeEvent } from "react";
+import { useState, useRef, type ChangeEvent } from "react";
 import { type Reminder as ReminderT } from "@prisma/client";
 import { CheckCheck, Trash2 } from "lucide-react";
-import { api } from "~/utils/api";
 import { useDragNDropContext } from "~/hooks/useDragNDrop";
 
 type ReminderProps = {

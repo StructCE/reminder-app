@@ -1,4 +1,5 @@
-function nextChar(c: string) {
+function nextChar(c: string | undefined) {
+  if (!c) throw new Error("deu merda em nextChar!");
   return String.fromCharCode(c.charCodeAt(0) + 1);
 }
 
@@ -9,7 +10,7 @@ export function getNextSortedBy(lastSortedBy: string | undefined): string {
   // periodic balancing;
   if (!lastSortedBy) return "m";
 
-  const lastChar = lastSortedBy[lastSortedBy.length - 1]!;
+  const lastChar = lastSortedBy[lastSortedBy.length - 1];
 
   if (lastChar === "z") return lastSortedBy + "m";
 
