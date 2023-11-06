@@ -1,4 +1,4 @@
-function previousChar(c: string) {
+function previousChar(c: string | undefined) {
   if (!c) throw new Error("deu merda em previousChar!");
   return String.fromCharCode(c.charCodeAt(0) - 1);
 }
