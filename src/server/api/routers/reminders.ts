@@ -1,6 +1,9 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { getMidSortedBy } from "~/server/utils/getMidSortedBy";
+import { getNextSortedBy } from "~/server/utils/getNextSortedBy";
+import { getPreviousSortedBy } from "~/server/utils/getPreviousSortedBy";
 
 export const remindersRouter = createTRPCRouter({
   getAll: protectedProcedure.query(({ ctx }) => {
@@ -10,12 +13,76 @@ export const remindersRouter = createTRPCRouter({
   }),
 
   createReminder: protectedProcedure
-    .input(z.object({ body: z.string() }))
+    .input(z.object({ body: z.string(), lastSortedBy: z.string() }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.prisma.reminder.create({
         data: {
           userId: ctx.session.user.id,
           body: input.body,
+          sortedBy: getNextSortedBy(input.lastSortedBy),
+        },
+      });
+    }),
+
+  updateSortedBy: protectedProcedure
+    .input(
+      z.object({
+        reminderId: z.string(),
+        previous: z.string().optional(),
+        next: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input: { reminderId, next, previous } }) => {
+      const reminder = await ctx.prisma.reminder.findUnique({
+        where: {
+          id: reminderId,
+        },
+        select: {
+          userId: true,
+        },
+      });
+
+      if (ctx.session.user.id !== reminder?.userId)
+        throw new Error("Reminder must be yours to sort");
+
+      if (!next && !previous)
+        return ctx.prisma.reminder.update({
+          where: {
+            id: reminderId,
+          },
+          data: {
+            sortedBy: getNextSortedBy(undefined),
+          },
+        });
+
+      if (next && previous) {
+        return ctx.prisma.reminder.update({
+          where: {
+            id: reminderId,
+          },
+          data: {
+            sortedBy: getMidSortedBy(previous, next),
+          },
+        });
+      }
+
+      if (next) {
+        return ctx.prisma.reminder.update({
+          where: {
+            id: reminderId,
+          },
+          data: {
+            sortedBy: getPreviousSortedBy(next),
+          },
+        });
+      }
+
+      return ctx.prisma.reminder.update({
+        where: {
+          id: reminderId,
+        },
+        data: {
+          sortedBy: getNextSortedBy(previous),
         },
       });
     }),
@@ -48,6 +115,7 @@ export const remindersRouter = createTRPCRouter({
         reminder: z.object({
           id: z.string(),
           body: z.string(),
+          // [TODO]: Make completed change affect sorting pos
           completed: z.boolean(),
         }),
       })

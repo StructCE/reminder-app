@@ -2,20 +2,26 @@
 import { useState, useRef, ChangeEvent } from "react";
 import { type Reminder as ReminderT } from "@prisma/client";
 import { CheckCheck, Trash2 } from "lucide-react";
+import { api } from "~/utils/api";
+import { useDragNDropContext } from "~/hooks/useDragNDrop";
 
 type ReminderProps = {
   reminder: ReminderT;
   handleDeleteReminder: (id: string) => void;
   handleUpdateReminder: (reminder: ReminderT) => void;
+  index: number;
 };
 
 export const Reminder = ({
   reminder: originalReminder,
   handleDeleteReminder,
   handleUpdateReminder,
+  index,
 }: ReminderProps) => {
   const [reminderBody, setReminderBody] = useState(originalReminder.body);
   const timeoutRef = useRef<undefined | NodeJS.Timeout>();
+
+  const { onDragEnd, onDragEnter, onDragStart } = useDragNDropContext();
 
   function handleBodyChange(
     e: ChangeEvent<HTMLTextAreaElement>,
@@ -33,7 +39,18 @@ export const Reminder = ({
   }
 
   return (
-    <div key={originalReminder.id} className="flex flex-col p-3 md:flex-row">
+    <div
+      onDragStart={() => onDragStart(index)}
+      onDragEnter={() => onDragEnter(index)}
+      onDragEnd={() => onDragEnd()}
+      draggable
+      key={originalReminder.id}
+      className="relative flex flex-col p-3 md:flex-row"
+    >
+      <div className="absolute -left-16 bottom-0 top-0 flex cursor-move gap-1 px-10 py-3">
+        <div className="my-auto h-8 w-[2px] rounded-full bg-zinc-300/80" />
+        <div className="my-auto h-10 w-[2px] rounded-full bg-zinc-300" />
+      </div>
       <textarea
         onChange={(e) => handleBodyChange(e, originalReminder)}
         className="h-40 max-w-full rounded-md bg-blue-400/30 bg-opacity-50 p-3 text-white outline-offset-1 outline-orange-400 drop-shadow-2xl focus-visible:outline md:flex-1"

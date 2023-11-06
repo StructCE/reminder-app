@@ -19,6 +19,7 @@ model Reminder {
     id        String   @id @default(cuid())
     body      String   @default("") // @db.Text
     userId    String
+    sortedBy  String   @default("z")
     completed Boolean  @default(false)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
