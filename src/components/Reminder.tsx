@@ -56,7 +56,7 @@ export const Reminder = ({
         name="body"
         value={reminderBody}
       />
-      <div className="ml-auto flex py-3 md:flex-col md:px-3">
+      <div className="ml-auto flex py-3 md:flex-col md:px-3 md:py-0">
         {originalReminder.completed ? (
           <button
             name="Deletar"

@@ -26,6 +26,7 @@ export function CreateReminder({
 }: CreateReminderProps) {
   const [isCreating, setIsCreating] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (isCreating) {
@@ -41,6 +42,7 @@ export function CreateReminder({
         onClick={() => {
           setIsCreating((s) => !s);
         }}
+        ref={buttonRef}
         className="group mx-auto mt-10 rounded-full bg-blue-500/20 p-2 text-white data-[creating='false']:mb-48 data-[creating='true']:bg-blue-500/10"
         data-creating={isCreating}
       >
@@ -52,11 +54,13 @@ export function CreateReminder({
             handleCreateReminder(e)
               .then(() => {
                 setCreatingReminderInfo((pr) => ({ ...pr, body: "" }));
+                setIsCreating(false);
                 setTimeout(() => {
                   window.scrollTo({
                     top: document.body.scrollHeight,
                     behavior: "smooth",
                   });
+                  buttonRef.current?.focus({ preventScroll: true });
                 }, 100);
               })
               .catch(() =>
