@@ -1,0 +1,26 @@
+.animate-width-slowly {
+  width: 0;
+  margin-inline: auto;
+  animation: width 600ms forwards;
+  animation-timing-function: ease-out;
+}
+
+.animate-width-slowly *:not(:first-child) {
+  opacity: 0;
+  animation: show 600ms 100ms forwards;
+  animation-timing-function: ease-out;
+}
+
+@keyframes width {
+  100% {
+    width: 100%;
+    transform: none;
+  }
+}
+
+@keyframes show {
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}

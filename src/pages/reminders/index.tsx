@@ -1,48 +1,95 @@
 import { type Reminder as ReminderT } from "@prisma/client";
 import * as RadioGroup from "@radix-ui/react-radio-group";
-import { Paperclip } from "lucide-react";
+import { LogOut, Paperclip } from "lucide-react";
 import Head from "next/head";
-import { FormEventHandler, useState } from "react";
+import { useRouter } from "next/router";
+import { type FormEvent, useState } from "react";
+import { CreateReminder } from "~/components/CreateReminder";
 import { Reminder } from "~/components/Reminder";
 import SecurePageWrapper from "~/components/SecurePageWrapper";
-import Sidebar from "~/components/Sidebar";
-import { api } from "~/utils/api";
+import { DragNDropContextProvider } from "~/hooks/useDragNDrop";
+import { type RouterInputs, api } from "~/utils/api";
+
+function compareReminderSort(a: string, b: string) {
+  return a < b ? -1 : a === b ? 0 : 1;
+}
 
 export default function RemindersPage() {
   const [showCompleted, setShowCompleted] = useState(false);
 
-  const utils = api.useContext();
+  const utils = api.useUtils();
   const reminders = api.reminders.getAll.useQuery();
-  const shownReminders = reminders.data?.filter(
-    (r) => r.completed === showCompleted
-  );
+  const shownReminders =
+    reminders.data
+      ?.filter((r) => r.completed === showCompleted)
+      .toSorted((a, b) => compareReminderSort(a.sortedBy, b.sortedBy)) ?? [];
 
   const reminderCreateMutation = api.reminders.createReminder.useMutation({
     onSuccess() {
-      utils.reminders.getAll.refetch();
+      void utils.reminders.getAll.refetch();
+    },
+    onError() {
+      alert("Ocorreu um erro ao tentar criar o lembrete...");
     },
   });
   const reminderDeleteMutation = api.reminders.deleteReminder.useMutation({
     onSuccess() {
-      utils.reminders.getAll.refetch();
+      void utils.reminders.getAll.refetch();
+    },
+    onError() {
+      alert("Ocorreu um erro ao tentar deletar o lembrete...");
     },
   });
   const reminderUpdateMutation = api.reminders.updateReminder.useMutation({
     onSuccess() {
-      utils.reminders.getAll.refetch();
+      void utils.reminders.getAll.refetch();
+    },
+    onError() {
+      alert("Ocorreu um erro ao tentar fazer update do lembrete...");
     },
   });
 
+  const reorderMutation = api.reminders.updateSortedBy.useMutation({
+    onSuccess() {
+      void utils.reminders.getAll.refetch();
+    },
+    onError() {
+      alert("Ocorreu um erro ao tentar reordenar os lembretes...");
+    },
+  });
+
+  function reorder(index: number, toIndex: number) {
+    const reminderId = shownReminders[index]?.id;
+    if (!reminderId) return;
+    if (index === toIndex) return;
+
+    let previous: string | undefined;
+    let next: string | undefined;
+    if (index > toIndex) {
+      previous = shownReminders[toIndex - 1]?.sortedBy;
+      next = shownReminders[toIndex]?.sortedBy;
+    } else {
+      previous = shownReminders[toIndex]?.sortedBy;
+      next = shownReminders[toIndex + 1]?.sortedBy;
+    }
+
+    reorderMutation.mutate({ reminderId, previous, next });
+  }
+
   const [creatingReminderInfo, setCreatingReminderInfo] = useState<
-    Pick<ReminderT, "body">
+    Omit<RouterInputs["reminders"]["createReminder"], "lastSortedBy">
   >({
     body: "",
   });
 
-  const handleCreateReminder: FormEventHandler<HTMLFormElement> = async (e) => {
+  const handleCreateReminder: (e: FormEvent) => Promise<ReminderT> = async (
+    e
+  ) => {
     e.preventDefault();
-    reminderCreateMutation.mutateAsync(creatingReminderInfo);
-    utils.reminders.invalidate();
+    return reminderCreateMutation.mutateAsync({
+      ...creatingReminderInfo,
+      lastSortedBy: shownReminders[shownReminders?.length - 1]?.sortedBy ?? "m",
+    });
   };
 
   function handleDeleteReminder(id: string) {
@@ -54,6 +101,7 @@ export default function RemindersPage() {
     reminderUpdateMutation.mutate({ reminder });
     return;
   }
+  const router = useRouter();
 
   return (
     <SecurePageWrapper>
@@ -62,76 +110,65 @@ export default function RemindersPage() {
         <meta name="description" content="Seus lembretes na Struct" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <section className="flex h-screen bg-gradient-to-b from-[#5ba7ee] to-[#15162c]">
-        <Sidebar />
-        <main className="w-full overflow-scroll bg-stone-500 bg-opacity-10 px-2 py-2 backdrop-blur-2xl">
-          <div className="mx-auto w-full xl:w-3/6">
-            <h1 className="my-10 text-4xl md:text-7xl">Lembretes</h1>
+      <section className="min-h-screen bg-gradient-to-b from-[rgb(9,20,36)] to-[rgb(11,27,52)]">
+        <button
+          onClick={() => router.back()}
+          className="w-max justify-around p-2 text-xl text-white hover:bg-[rgba(0,0,0,0.3)]"
+        >
+          <LogOut className="rotate-180 text-amber-500" />
+        </button>
+        <main className="h-full w-full overflow-scroll px-2 py-2">
+          <div className="mx-auto flex h-full w-full flex-col xl:w-3/6">
             <RadioGroup.Root
-              className="flex justify-around"
+              className="ml-auto flex gap-4 p-3 md:ml-0"
               value={showCompleted ? "completed" : "pending"}
               onValueChange={(v) => setShowCompleted(v === "completed")}
               aria-label="View density"
             >
               <RadioGroup.Item
-                className="relative flex gap-1 rounded-md p-2"
+                className="relative z-0 flex gap-1 rounded-md p-2 outline-offset-1 outline-orange-400 focus-visible:outline"
                 value="pending"
                 id="r1"
               >
-                <Paperclip />
-                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-950 bg-opacity-30" />
-                <label className="cursor-pointer" htmlFor="r1">
+                <Paperclip className="text-zinc-400" />
+                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-500/20" />
+                <label className="cursor-pointer text-white" htmlFor="r1">
                   Pendentes
                 </label>
               </RadioGroup.Item>
               <RadioGroup.Item
-                className="relative flex gap-1 rounded-md p-2"
+                className="relative z-0 flex gap-1 rounded-md p-2 outline-offset-1 outline-orange-400 focus-visible:outline"
                 value="completed"
                 id="r2"
               >
-                <Paperclip />
-                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-950 bg-opacity-30" />
-                <label className="cursor-pointer" htmlFor="r2">
+                <Paperclip className="text-zinc-400" />
+                <RadioGroup.Indicator className="absolute inset-0 -z-10 rounded-md bg-blue-500/20" />
+                <label className="cursor-pointer text-white" htmlFor="r2">
                   Concluídos
                 </label>
               </RadioGroup.Item>
             </RadioGroup.Root>
 
             <ul className="flex min-h-[70vh] flex-col rounded-xl">
-              {shownReminders
-                ? shownReminders.map((reminder) => (
-                    <li key={reminder.id}>
-                      <Reminder
-                        reminder={reminder}
-                        handleDeleteReminder={handleDeleteReminder}
-                        handleUpdateReminder={handleUpdateReminder}
-                      />
-                    </li>
-                  ))
-                : "Carregando"}
+              <DragNDropContextProvider onDragEnd={reorder}>
+                {shownReminders
+                  ? shownReminders.map((reminder, i) => (
+                      <li key={reminder.id}>
+                        <Reminder
+                          index={i}
+                          reminder={reminder}
+                          handleDeleteReminder={handleDeleteReminder}
+                          handleUpdateReminder={handleUpdateReminder}
+                        />
+                      </li>
+                    ))
+                  : "Carregando"}
+              </DragNDropContextProvider>
             </ul>
-
-            <form
-              onSubmit={handleCreateReminder}
-              className="flex flex-wrap items-center justify-around"
-            >
-              <label className="flex items-center" htmlFor="body">
-                Corpo do lembrete:
-              </label>
-              <textarea
-                className="rounded-md border-2 border-solid border-slate-900 bg-white p-2 text-zinc-900 "
-                id="body"
-                onChange={(e) =>
-                  setCreatingReminderInfo({ body: e.target.value })
-                }
-              />
-              <button
-                className="rounded-md border-2 border-solid border-slate-400 bg-slate-400 p-2"
-                type="submit"
-              >
-                Criar
-              </button>
-            </form>
+            <CreateReminder
+              handleCreateReminder={handleCreateReminder}
+              setCreatingReminderInfo={setCreatingReminderInfo}
+            />
           </div>
         </main>
       </section>

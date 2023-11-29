@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
     previewFeatures = ["jsonProtocol"]
 }
 
@@ -17,8 +17,9 @@ datasource db {
 
 model Reminder {
     id        String   @id @default(cuid())
-    body      String   @default("")
+    body      String   @default("") // @db.Text
     userId    String
+    sortedBy  String   @default("z")
     completed Boolean  @default(false)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -53,9 +54,9 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String     @id @default(cuid())
     name          String?
-    email         String?   @unique
+    email         String?    @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]

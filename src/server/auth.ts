@@ -54,7 +54,7 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
-    signIn: async ({ account, profile }) => {
+    signIn: ({ account, profile }) => {
       if (isGoogleSignIn(account, profile)) {
         return !!(
           profile?.email_verified && profile.email?.endsWith("@struct.unb.br")

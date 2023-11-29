@@ -14,7 +14,7 @@ export default function SecurePageWrapper({
     case "authenticated":
       return <>{children}</>;
     case "unauthenticated":
-      router.push("/");
+      void router.push("/");
       break;
     case "loading":
       return <h1>Loading</h1>;

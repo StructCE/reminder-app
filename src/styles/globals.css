@@ -5,4 +5,9 @@
 body {
   @apply bg-cyan-800;
   @apply min-h-full;
+  scroll-behavior: smooth;
+}
+
+*:focus-visible {
+  @apply outline outline-2 outline-offset-1 outline-orange-400;
 }

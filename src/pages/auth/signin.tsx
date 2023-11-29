@@ -10,7 +10,7 @@ export default function SignInPage() {
         <div>
           <button
             onClick={() =>
-              signIn("google", { callbackUrl: env.NEXT_PUBLIC_BASE_URL })
+              void signIn("google", { callbackUrl: env.NEXT_PUBLIC_BASE_URL })
             }
             className="flex rounded-md border-b-2 border-r-2 border-zinc-500 bg-slate-100 p-4 transition-transform hover:scale-y-[102%]"
           >
