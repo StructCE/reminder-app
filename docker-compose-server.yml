@@ -8,7 +8,7 @@ networks:
 
 services:
   web:
-    image: structej/projetos:reminder-nextjs-1.0
+    image: structej/projetos:reminder-nextjs-2.0
     environment:
       NEXTAUTH_SECRET: ""
       NEXTAUTH_URL: ""
