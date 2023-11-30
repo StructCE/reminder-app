@@ -13,11 +13,11 @@ COPY prisma ./
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml\* ./
 
 RUN \
- if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
- elif [ -f package-lock.json ]; then npm ci; \
- elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i; \
- else echo "Lockfile not found." && exit 1; \
- fi
+    if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then npm ci; \
+    elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i; \
+    else echo "Lockfile not found." && exit 1; \
+    fi
 
 ##### BUILDER
 
@@ -33,11 +33,11 @@ ENV NEXT_PUBLIC_BASE_URL 'https://reminder.structej.com/'
 ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN \
- if [ -f yarn.lock ]; then SKIP_ENV_VALIDATION=1 yarn build; \
- elif [ -f package-lock.json ]; then SKIP_ENV_VALIDATION=1 npm run build; \
- elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && SKIP_ENV_VALIDATION=1 pnpm run build; \
- else echo "Lockfile not found." && exit 1; \
- fi
+    if [ -f yarn.lock ]; then SKIP_ENV_VALIDATION=1 yarn build; \
+    elif [ -f package-lock.json ]; then SKIP_ENV_VALIDATION=1 npm run build; \
+    elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && SKIP_ENV_VALIDATION=1 pnpm run build; \
+    else echo "Lockfile not found." && exit 1; \
+    fi
 
 ##### RUNNER
 
@@ -56,14 +56,17 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/next.config.mjs ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/start.sh /app/start.sh
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/prisma/schema.prisma ./prisma/schema.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+RUN npm install -g prisma
+RUN chmod +x ./start.sh
 USER nextjs
-EXPOSE 3000
+# EXPOSE 3000
 ENV PORT 3000
 
 # From standalone build, copied from .next/standalone
-CMD ["node", "server.js"]
+CMD ["./start.sh"]
